@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kalkulator Waris Islami — WARIS (Tengah)</title>
+<style>
+  :root{
+    --blue-1:#0f4c81; --blue-2:#1a73e8;
+    --bg:#f4f8ff; --card:#ffffff; --muted:#6b7280;
+  }
+  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  body{margin:0;background:linear-gradient(180deg,var(--bg),#e9f1ff);color:#04263a;min-height:100vh;padding:18px;}
+  .wrap{max-width:920px;margin:0 auto}
+  /* Header now vertical and centered */
+  header{display:flex;flex-direction:column;gap:12px;align-items:center;margin-bottom:14px;text-align:center}
+  .logo-wrap{width:96px;height:96px;border-radius:14px;background:linear-gradient(135deg,var(--blue-1),var(--blue-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:18px;position:relative;overflow:hidden;border:4px solid rgba(255,255,255,0.12)}
+  .logo-wrap img{width:100%;height:100%;object-fit:contain;display:block}
+  h1{margin:0;font-size:20px}
+  p.lead{margin:0;color:var(--muted);font-size:13px}
+  .panel{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 8px 24px rgba(12,44,87,0.06);margin-bottom:12px}
+  form .row{display:block;margin-bottom:12px}
+  label{display:block;font-size:13px;color:#0b3050;margin-bottom:6px}
+  input[type="number"], input[type="text"], select{width:100%;padding:10px;border-radius:8px;border:1px solid #d7e6fb;background:#fbfdff;font-size:14px}
+  .two{display:flex;gap:10px}
+  .two > *{flex:1}
+  .small{font-size:12px;color:var(--muted);margin-top:6px}
+  .blue-btn{background:linear-gradient(90deg,var(--blue-1),var(--blue-2));color:white;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+  .muted{color:var(--muted);font-size:13px}
+  #results .result-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(90deg, rgba(26,115,232,0.04), rgba(15,76,129,0.03));border:1px solid rgba(15,76,129,0.06);margin-bottom:8px}
+  @media (min-width:900px){
+    .form-grid{display:grid;grid-template-columns:1fr 320px;gap:14px}
+    /* layout kept single column intentionally (form above results) */
+  }
+  /* helper */
+  .center{display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+  <div class="wrap" role="main" aria-label="Kalkulator Waris Islami">
+    <header>
+      <div class="logo-wrap" id="logoWrap" title="Logo waris">
+        <!-- default logo text stays and is centered -->
+        <div id="logoText" style="padding:6px;text-align:center">WARIS</div>
+      </div>
+
+      <div style="width:100%">
+        <h1>Kalkulator Waris Islam (Faraid)</h1>
+        <p class="lead">Masukkan data pewaris — (Upload/Reset logo dihilangkan, logo WARIS diposisikan tengah).</p>
+      </div>
+    </header>
+
+<!-- MAIN FORM (single-column like google form) -->
+<div class="panel" aria-labelledby="formTitle">
+  <h3 id="formTitle">Input Data Pewaris</h3>
+
+  <form id="warisForm" onsubmit="event.preventDefault(); calculate()">
+    <div class="row">
+      <label>Nama (opsional)</label>
+      <input id="name" type="text" placeholder="Contoh: Bapak Ahmad">
+    </div>
+
+    <div class="two row">
+      <div>
+        <label>Nilai Harta (Rp)</label>
+        <input id="estate" type="number" min="0" value="100000000" step="1">
+        <div class="small">Masukkan jumlah total (mis. 100000000)</div>
+      </div>
+      <div>
+        <label>Usia (opsional)</label>
+        <input id="age" type="number" min="0" placeholder="">
+      </div>
+    </div>
+
+    <div class="row">
+      <label>Jenis kelamin yang meninggal</label>
+      <select id="gender">
+        <option value="male">Laki-laki (almarhum)</option>
+        <option value="female">Perempuan (almarhumah)</option>
+      </select>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #eef6ff;margin:8px 0">
+
+    <h4>Ahli Waris Langsung</h4>
+
+    <div class="two row">
+      <div>
+        <label>Suami (jika almarhumah)</label>
+        <select id="husband"><option value="0">Tidak</option><option value="1">Ya (1)</option></select>
+      </div>
+      <div>
+        <label>Jumlah Istri (jika almarhum)</label>
+        <select id="wives"><option value="0">0</option><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+      </div>
+    </div>
+
+    <div class="two row">
+      <div>
+        <label>Jumlah Anak Laki-laki</label>
+        <input id="sons" type="number" min="0" value="0">
+      </div>
+      <div>
+        <label>Jumlah Anak Perempuan</label>
+        <input id="daughters" type="number" min="0" value="0">
+      </div>
+    </div>
+
+    <div class="two row">
+      <div>
+        <label>Ayah masih hidup?</label>
+        <select id="father"><option value="0">Tidak</option><option value="1" selected>Ya</option></select>
+      </div>
+      <div>
+        <label>Ibu masih hidup?</label>
+        <select id="mother"><option value="0">Tidak</option><option value="1" selected>Ya</option></select>
+      </div>
+    </div>
+
+    <h4>Saudara (jika ada)</h4>
+    <div class="two row">
+      <div>
+        <label>Jumlah Saudara Laki-laki</label>
+        <input id="brothers" type="number" min="0" value="0">
+      </div>
+      <div>
+        <label>Jumlah Saudara Perempuan</label>
+        <input id="sisters" type="number" min="0" value="0">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+      <button class="blue-btn" type="submit">Hitung Pembagian</button>
+      <button type="button" class="file-btn" onclick="resetForm()">Reset</button>
+    </div>
+
+    <div class="small" style="margin-top:10px">
+      <strong>Catatan:</strong> Kalkulator ini mengikuti aturan umum (bagian tetap kemudian residu). Untuk kasus khusus konsultasikan ahli.
+    </div>
+  </form>
+</div>
+
+<!-- RESULTS & AI below form (moved to bottom like Google Form) -->
+<div class="panel" id="resultsPanel" aria-live="polite">
+  <h3>Hasil Pembagian</h3>
+  <div id="summary" class="muted">Masukkan data lalu klik "Hitung Pembagian".</div>
+  <div id="results" style="margin-top:12px"></div>
+  <div id="remaining" class="muted" style="margin-top:10px"></div>
+</div>
+
+<div class="panel ai-box">
+  <h4>AI Helper — Penjelasan Singkat</h4>
+  <div id="aiText" class="small">Setelah menghitung, AI akan menjelaskan pembagian secara singkat.</div>
+</div>
+
+<footer style="text-align:right;color:var(--muted);font-size:12px;margin-top:8px">© Kalkulator Waris — Panduan (tidak menggantikan fatwa)</footer>
+
+  </div>
+
+  <script>
+/* Helper formatting */
+function fmt(n){
+  if (!isFinite(n)) return '0';
+  return n.toLocaleString('id-ID', {maximumFractionDigits:0});
+}
+
+/* Reset form function */
+function resetForm(){
+  document.getElementById('estate').value = 100000000;
+  document.getElementById('gender').value = 'male';
+  document.getElementById('sons').value = 0;
+  document.getElementById('daughters').value = 0;
+  document.getElementById('wives').value = 1;
+  document.getElementById('husband').value = 0;
+  document.getElementById('father').value = 1;
+  document.getElementById('mother').value = 1;
+  document.getElementById('brothers').value = 0;
+  document.getElementById('sisters').value = 0;
+  document.getElementById('results').innerHTML='';
+  document.getElementById('summary').innerText = 'Masukkan data lalu klik "Hitung Pembagian".';
+  document.getElementById('aiText').innerText = 'Setelah menghitung, AI akan menjelaskan pembagian secara singkat.';
+  document.getElementById('remaining').innerText = '';
+}
+
+/* Kalkulator (logika tidak diubah, hanya dipindahkan dari versi sebelumnya) */
+function calculate(){
+  const estate = Number(document.getElementById('estate').value) || 0;
+  const gender = document.getElementById('gender').value;
+  const sons = Math.max(0, Math.floor(Number(document.getElementById('sons').value) || 0));
+  const daughters = Math.max(0, Math.floor(Number(document.getElementById('daughters').value) || 0));
+  const wives = Math.max(0, Math.floor(Number(document.getElementById('wives').value) || 0));
+  const husband = Number(document.getElementById('husband').value) === 1;
+  const fatherAlive = Number(document.getElementById('father').value) === 1;
+  const motherAlive = Number(document.getElementById('mother').value) === 1;
+  const brothers = Math.max(0, Math.floor(Number(document.getElementById('brothers').value) || 0));
+  const sisters = Math.max(0, Math.floor(Number(document.getElementById('sisters').value) || 0));
+  const name = document.getElementById('name').value || 'Almarhum/ah';
+  const childrenExist = (sons + daughters) > 0;
+
+  let fixed = {};
+  if (gender === 'male'){
+    if (wives > 0) fixed['wives_total'] = childrenExist ? 1/8 : 1/4;
+  } else {
+    if (husband) fixed['husband'] = childrenExist ? 1/4 : 1/2;
+  }
+  if (motherAlive){
+    if (childrenExist) fixed['mother'] = 1/6;
+    else fixed['mother'] = (brothers + sisters) > 0 ? 1/6 : 1/3;
+  }
+  if (fatherAlive && childrenExist) fixed['father'] = 1/6;
+  if (daughters > 0 && sons === 0){
+    fixed[daughters === 1 ? 'daughter_1' : 'daughters_many'] = (daughters === 1) ? 1/2 : 2/3;
+  }
+
+  let totalFixed = Object.values(fixed).reduce((a,b)=>a+(b||0),0);
+  if (totalFixed > 1 + 1e-12){
+    const awl = 1 / totalFixed;
+    for (const k in fixed) fixed[k] *= awl;
+    totalFixed = Object.values(fixed).reduce((a,b)=>a+(b||0),0);
+  }
+  let remainderFrac = Math.max(0, 1 - totalFixed);
+  let residuary = {};
+
+  if ((sons + daughters) > 0){
+    const units = sons*2 + daughters*1;
+    if (units>0){
+      const unitVal = remainderFrac / units;
+      if (sons>0) residuary['son_unit'] = unitVal*2;
+      if (daughters>0) residuary['daughter_unit'] = unitVal*1;
+      remainderFrac = 0;
+    }
+  } else {
+    if (fatherAlive){
+      residuary['father_remainder'] = remainderFrac; remainderFrac = 0;
+    } else if ((brothers + sisters) > 0){
+      const units = brothers*2 + sisters*1;
+      if (units>0){
+        const unitVal = remainderFrac / units;
+        if (brothers>0) residuary['brother_unit'] = unitVal*2;
+        if (sisters>0) residuary['sister_unit'] = unitVal*1;
+        remainderFrac = 0;
+      }
+    }
+  }
+
+  // Render results
+  const resultsEl = document.getElementById('results');
+  resultsEl.innerHTML = '';
+  function pushItem(title, frac, count){
+    const amount = Math.round(estate * frac);
+    const row = document.createElement('div');
+    row.className = 'result-item';
+    row.innerHTML = `<div><strong>${title}</strong><div class="small">${count ? 'Jumlah: '+count : ''}</div></div><div style="text-align:right"><strong>${fmt(amount)}</strong><div class="small">${(frac*100).toFixed(2)}%</div></div>`;
+    resultsEl.appendChild(row);
+  }
+
+  if (fixed['wives_total']){
+    const totalF = fixed['wives_total'];
+    pushItem('Istri (total)', totalF, wives);
+    const per = wives>0 ? totalF/wives : 0;
+    for (let i=1;i<=wives;i++) pushItem(' - Istri #'+i, per, 1);
+  }
+  if (fixed['husband']) pushItem('Suami', fixed['husband'], 1);
+  if (fixed['mother']) pushItem('Ibu', fixed['mother'], 1);
+  if (fixed['father']) pushItem('Ayah (bag. tetap)', fixed['father'], 1);
+  if (fixed['daughter_1']) pushItem('Anak perempuan (1)', fixed['daughter_1'], 1);
+  if (fixed['daughters_many']){
+    pushItem('Anak perempuan (bersama)', fixed['daughters_many'], daughters);
+    const each = fixed['daughters_many']/daughters;
+    for (let i=1;i<=daughters;i++) pushItem(' - Anak perempuan #'+i, each, 1);
+  }
+  if (residuary['son_unit']) for (let i=1;i<=sons;i++) pushItem('Anak laki-laki #'+i, residuary['son_unit'], 1);
+  if (residuary['daughter_unit']) for (let i=1;i<=daughters;i++) pushItem('Anak perempuan #'+i, residuary['daughter_unit'], 1);
+  if (residuary['father_remainder']) pushItem('Ayah (residu)', residuary['father_remainder'], 1);
+  if (residuary['brother_unit']) for (let i=1;i<=brothers;i++) pushItem('Saudara laki-laki #'+i, residuary['brother_unit'], 1);
+  if (residuary['sister_unit']) for (let i=1;i<=sisters;i++) pushItem('Saudara perempuan #'+i, residuary['sister_unit'], 1);
+
+  const remainingEl = document.getElementById('remaining');
+  if (remainderFrac > 0.0000001){
+    remainingEl.innerText = `Sisa harta belum terdistribusi: ${fmt(Math.round(estate*remainderFrac))} (≈ ${(remainderFrac*100).toFixed(2)}%).`;
+  } else remainingEl.innerText = '';
+
+  document.getElementById('summary').innerText = `${name} — Harta: ${fmt(estate)}. Perhitungan selesai.`;
+  document.getElementById('aiText').innerText = 'Ringkasan: bagian tetap dihitung terlebih dahulu; sisa dibagikan kepada ashobah sesuai prioritas. Untuk kasus kompleks, konsultasi ulama/pengadilan.';
+}
+  </script>
+</body>
+</html>
